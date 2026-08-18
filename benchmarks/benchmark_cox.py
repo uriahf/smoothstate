@@ -43,7 +43,7 @@ def lifelines_curve(
     return 1.0 - cph.predict_survival_function(grid_df, times=[horizon]).values.ravel()
 
 
-def timed(fn, repeats: int = 3) -> tuple[float, np.ndarray]:
+def timed(fn, repeats: int) -> tuple[float, np.ndarray]:
     durations = []
     out = None
     for _ in range(repeats):
@@ -59,12 +59,13 @@ def main() -> None:
     print("n,smoothstate_s,lifelines_s,speedup,max_abs_diff,mean_abs_diff")
     for n in (1_000, 10_000, 100_000):
         probs, times, events = simulate(n)
+        repeats = 3 if n < 100_000 else 1
         smooth_t, smooth_curve = timed(
             lambda: smooth_state_cox(probs, times, events, horizon)["y"].to_numpy(),
-            repeats=3,
+            repeats=repeats,
         )
         life_t, life_curve = timed(
-            lambda: lifelines_curve(probs, times, events, horizon), repeats=3
+            lambda: lifelines_curve(probs, times, events, horizon), repeats=repeats
         )
         diff = np.abs(smooth_curve - life_curve)
         print(
