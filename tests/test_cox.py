@@ -56,6 +56,6 @@ def test_secondary_cox_tracks_lifelines():
     grid_df = pd.DataFrame({"rcs_1": grid_basis[:, 0], "rcs_2": grid_basis[:, 1]})
     expected = 1.0 - cph.predict_survival_function(grid_df, times=[horizon]).values.ravel()
 
-    # The custom solver should reproduce the same curve closely enough for
-    # calibration plotting. Tighten this as penalty conventions are aligned.
-    np.testing.assert_allclose(ours["y"].to_numpy(), expected, atol=0.03, rtol=0.08)
+    # Coefficients now match lifelines closely. The remaining small curve-level
+    # difference comes from baseline-hazard evaluation at an arbitrary horizon.
+    np.testing.assert_allclose(ours["y"].to_numpy(), expected, atol=0.002, rtol=0.002)
