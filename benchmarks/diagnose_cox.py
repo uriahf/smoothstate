@@ -6,12 +6,22 @@ import numpy as np
 import pandas as pd
 from lifelines import CoxPHFitter
 
-from benchmarks.benchmark_cox import simulate
 from smoothstate.cox import (
     _breslow_baseline_cumulative_hazard,
     _fit_cox_efron,
     _rcs_basis_3knots,
 )
+
+
+def simulate(n: int, seed: int = 20260818) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    rng = np.random.default_rng(seed + n)
+    probs = rng.uniform(0.02, 0.75, size=n)
+    x = np.log(-np.log(1 - probs))
+    event_time = rng.exponential(scale=np.exp(-0.5 * x) * 8.0)
+    censor_time = rng.exponential(scale=12.0, size=n)
+    times = np.minimum(event_time, censor_time)
+    events = (event_time <= censor_time).astype(int)
+    return probs, times, events
 
 
 def main() -> None:
