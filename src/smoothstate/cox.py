@@ -139,7 +139,12 @@ def _breslow_baseline_cumulative_hazard(
     event: np.ndarray,
     horizon: float,
 ) -> float:
-    """Estimate Breslow baseline cumulative hazard through ``horizon``."""
+    """Estimate and interpolate Breslow baseline cumulative hazard.
+
+    The cumulative hazard is evaluated at every observed time and linearly
+    interpolated at ``horizon``. This mirrors lifelines' prediction behavior
+    when a requested horizon is not itself an observed time.
+    """
     risk = np.exp(np.clip(x @ beta, -50.0, 50.0))
     order = np.argsort(-time, kind="stable")
     time_s = time[order]
@@ -148,11 +153,14 @@ def _breslow_baseline_cumulative_hazard(
 
     if len(np.unique(time_s)) == len(time_s):
         cumulative_risk = np.cumsum(risk_s)
-        idx = (event_s == 1) & (time_s <= horizon)
-        return float(np.sum(1.0 / cumulative_risk[idx]))
+        increments_desc = np.where(event_s == 1, 1.0 / cumulative_risk, 0.0)
+        times_asc = time_s[::-1]
+        cumulative_hazard = np.cumsum(increments_desc[::-1])
+        return float(np.interp(horizon, times_asc, cumulative_hazard))
 
     cumulative_risk = 0.0
-    h0 = 0.0
+    group_times_desc: list[float] = []
+    increments_desc: list[float] = []
     start = 0
     n = len(time_s)
     while start < n:
@@ -161,12 +169,14 @@ def _breslow_baseline_cumulative_hazard(
         while end < n and time_s[end] == current_time:
             end += 1
         cumulative_risk += float(risk_s[start:end].sum())
-        if current_time <= horizon:
-            d = int(event_s[start:end].sum())
-            if d and cumulative_risk > 0:
-                h0 += d / cumulative_risk
+        d = int(event_s[start:end].sum())
+        group_times_desc.append(float(current_time))
+        increments_desc.append(d / cumulative_risk if d and cumulative_risk > 0 else 0.0)
         start = end
-    return float(h0)
+
+    times_asc = np.asarray(group_times_desc[::-1], dtype=float)
+    cumulative_hazard = np.cumsum(np.asarray(increments_desc[::-1], dtype=float))
+    return float(np.interp(horizon, times_asc, cumulative_hazard))
 
 
 def smooth_state_cox(
