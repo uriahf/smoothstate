@@ -26,7 +26,8 @@ def main() -> None:
     censor_time = rng.exponential(scale=12.0, size=n)
     times = np.minimum(event_time, censor_time)
     events = (event_time <= censor_time).astype(int)
-    horizon = 5.0
+    observed_event_times = np.sort(times[events == 1])
+    horizon = float(observed_event_times[len(observed_event_times) // 2])
 
     basis, knots = _rcs_basis_3knots(x)
     beta = _fit_cox_efron(basis, times, events, penalizer=0.0)
