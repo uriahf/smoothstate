@@ -1,0 +1,15 @@
+# Performance
+
+`smoothstate` is intentionally specialized for smoothing state probabilities. The secondary-Cox implementation uses the same cloglog transformation, 3-knot restricted cubic spline, Efron tie handling, and ridge-penalized Cox model used by the current `rtichoke` implementation, while avoiding the general modeling overhead of `lifelines`.
+
+On GitHub Actions with Python 3.12 and `lifelines` 0.30.3:
+
+| Observations | `smoothstate` | `lifelines` | Speedup |
+|---:|---:|---:|---:|
+| 1,000 | 0.0021 s | 0.0811 s | 38.2× |
+| 10,000 | 0.0211 s | 0.6114 s | 29.0× |
+| 100,000 | 0.2251 s | 5.9622 s | 26.5× |
+
+The fitted Cox coefficients agree with `lifelines` to numerical precision after matching its current penalty scaling and standardization convention. Predicted calibration curves also agree closely; the remaining very small differences arise from baseline cumulative-hazard evaluation at an arbitrary prediction horizon.
+
+These benchmarks are development checks rather than general claims about all Cox regression workloads. `smoothstate` is faster here because it solves a deliberately narrow problem with a one-predictor, two-column spline design matrix.
