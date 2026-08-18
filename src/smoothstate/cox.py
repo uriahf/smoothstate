@@ -37,12 +37,7 @@ def _cox_score_info_efron(
     event: np.ndarray,
     penalizer: float,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Score and observed information for a Cox model with Efron ties.
-
-    Risk-set moments are accumulated once while traversing observations from
-    largest to smallest time. This avoids rebuilding each risk set from the
-    full sample and keeps each Newton iteration approximately O(n).
-    """
+    """Score and observed information for a Cox model with Efron ties."""
     eta = np.clip(x @ beta, -50.0, 50.0)
     risk = np.exp(eta)
     p = x.shape[1]
@@ -55,10 +50,25 @@ def _cox_score_info_efron(
     x_s = x[order]
     risk_s = risk[order]
 
+    # Fast path: no tied times. Risk-set moments are cumulative sums and all
+    # event contributions can be evaluated in vectorized form.
+    if len(np.unique(time_s)) == len(time_s):
+        s0 = np.cumsum(risk_s)
+        s1 = np.cumsum(risk_s[:, None] * x_s, axis=0)
+        xx = np.einsum("ij,ik->ijk", x_s, x_s)
+        s2 = np.cumsum(risk_s[:, None, None] * xx, axis=0)
+
+        idx = event_s == 1
+        mean = s1[idx] / s0[idx, None]
+        second = s2[idx] / s0[idx, None, None]
+        score += x_s[idx].sum(axis=0) - mean.sum(axis=0)
+        info += (second - np.einsum("ij,ik->ijk", mean, mean)).sum(axis=0)
+        return score, info
+
+    # Exact Efron fallback for tied times.
     s0 = 0.0
     s1 = np.zeros(p, dtype=float)
     s2 = np.zeros((p, p), dtype=float)
-
     start = 0
     n = len(time_s)
     while start < n:
@@ -70,7 +80,6 @@ def _cox_score_info_efron(
         x_group = x_s[start:end]
         r_group = risk_s[start:end]
         e_group = event_s[start:end]
-
         s0 += float(r_group.sum())
         s1 += (r_group[:, None] * x_group).sum(axis=0)
         s2 += np.einsum("i,ij,ik->jk", r_group, x_group, x_group)
@@ -84,7 +93,6 @@ def _cox_score_info_efron(
             d1 = (rd[:, None] * xd).sum(axis=0)
             d2 = np.einsum("i,ij,ik->jk", rd, xd, xd)
             score += xd.sum(axis=0)
-
             for l in range(d):
                 frac = l / d
                 den = s0 - frac * d0
@@ -92,7 +100,6 @@ def _cox_score_info_efron(
                 second = (s2 - frac * d2) / den
                 score -= mean
                 info += second - np.outer(mean, mean)
-
         start = end
 
     return score, info
@@ -126,12 +133,17 @@ def _breslow_baseline_cumulative_hazard(
     event: np.ndarray,
     horizon: float,
 ) -> float:
-    """Estimate Breslow baseline cumulative hazard through ``horizon`` in O(n)."""
+    """Estimate Breslow baseline cumulative hazard through ``horizon``."""
     risk = np.exp(np.clip(x @ beta, -50.0, 50.0))
     order = np.argsort(-time, kind="stable")
     time_s = time[order]
     event_s = event[order]
     risk_s = risk[order]
+
+    if len(np.unique(time_s)) == len(time_s):
+        cumulative_risk = np.cumsum(risk_s)
+        idx = (event_s == 1) & (time_s <= horizon)
+        return float(np.sum(1.0 / cumulative_risk[idx]))
 
     cumulative_risk = 0.0
     h0 = 0.0
@@ -142,14 +154,12 @@ def _breslow_baseline_cumulative_hazard(
         current_time = time_s[start]
         while end < n and time_s[end] == current_time:
             end += 1
-
         cumulative_risk += float(risk_s[start:end].sum())
         if current_time <= horizon:
             d = int(event_s[start:end].sum())
             if d and cumulative_risk > 0:
                 h0 += d / cumulative_risk
         start = end
-
     return float(h0)
 
 
@@ -164,10 +174,9 @@ def smooth_state_cox(
 ) -> pl.DataFrame:
     """Smooth event-state probability using secondary Cox + 3-knot RCS.
 
-    This mirrors the secondary Cox smoother used by ``rtichoke``: predicted
-    probabilities are complementary-log-log transformed, expanded with a
-    3-knot restricted cubic spline, and used as the sole predictors in a Cox
-    proportional hazards model.
+    Predicted probabilities are complementary-log-log transformed, expanded
+    with a 3-knot restricted cubic spline, and used as the sole predictors in
+    a small Cox proportional hazards model.
     """
     p = np.asarray(probs, dtype=float)
     t = np.asarray(times, dtype=float)
