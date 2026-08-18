@@ -15,6 +15,7 @@ jobs:
           python-version: '3.12'
       - run: uv sync --extra dev
       - run: uv run pytest -q
+      - run: uv run python benchmarks/diagnose_cox.py
       - run: uv run python benchmarks/benchmark_cox.py | tee benchmark-results.csv
       - uses: actions/upload-artifact@v4
         with:
