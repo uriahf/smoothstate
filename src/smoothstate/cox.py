@@ -35,14 +35,14 @@ def _cox_score_info_efron(
     x: np.ndarray,
     time: np.ndarray,
     event: np.ndarray,
-    penalizer: float,
+    penalty_weights: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Score and observed information for a Cox model with Efron ties."""
     eta = np.clip(x @ beta, -50.0, 50.0)
     risk = np.exp(eta)
     p = x.shape[1]
-    score = -penalizer * beta
-    info = np.eye(p) * penalizer
+    score = -penalty_weights * beta
+    info = np.diag(penalty_weights)
 
     order = np.argsort(-time, kind="stable")
     time_s = time[order]
@@ -50,8 +50,6 @@ def _cox_score_info_efron(
     x_s = x[order]
     risk_s = risk[order]
 
-    # Fast path: no tied times. Risk-set moments are cumulative sums and all
-    # event contributions can be evaluated in vectorized form.
     if len(np.unique(time_s)) == len(time_s):
         s0 = np.cumsum(risk_s)
         s1 = np.cumsum(risk_s[:, None] * x_s, axis=0)
@@ -65,7 +63,6 @@ def _cox_score_info_efron(
         info += (second - np.einsum("ij,ik->ijk", mean, mean)).sum(axis=0)
         return score, info
 
-    # Exact Efron fallback for tied times.
     s0 = 0.0
     s1 = np.zeros(p, dtype=float)
     s2 = np.zeros((p, p), dtype=float)
@@ -114,10 +111,19 @@ def _fit_cox_efron(
     max_iter: int = 50,
     tol: float = 1e-8,
 ) -> np.ndarray:
-    """Fit a small Cox PH model with Newton-Raphson."""
+    """Fit a small Cox PH model with Newton-Raphson.
+
+    The L2 penalty matches lifelines' convention: the penalty is scaled by
+    sample size and is applied on internally standardized covariates. On the
+    original coefficient scale this is ``n * penalizer * std(X)^2``.
+    """
+    std = np.std(x, axis=0, ddof=1)
+    std = np.where(std > 0, std, 1.0)
+    penalty_weights = len(x) * penalizer * std**2
+
     beta = np.zeros(x.shape[1], dtype=float)
     for _ in range(max_iter):
-        score, info = _cox_score_info_efron(beta, x, time, event, penalizer)
+        score, info = _cox_score_info_efron(beta, x, time, event, penalty_weights)
         step = np.linalg.solve(info, score)
         beta_new = beta + step
         if np.max(np.abs(step)) < tol:
@@ -172,12 +178,7 @@ def smooth_state_cox(
     grid: np.ndarray | None = None,
     penalizer: float = 0.01,
 ) -> pl.DataFrame:
-    """Smooth event-state probability using secondary Cox + 3-knot RCS.
-
-    Predicted probabilities are complementary-log-log transformed, expanded
-    with a 3-knot restricted cubic spline, and used as the sole predictors in
-    a small Cox proportional hazards model.
-    """
+    """Smooth event-state probability using secondary Cox + 3-knot RCS."""
     p = np.asarray(probs, dtype=float)
     t = np.asarray(times, dtype=float)
     e = np.asarray(events, dtype=int)
