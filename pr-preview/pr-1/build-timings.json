@@ -1,45 +1,45 @@
 {
-  "build_time": "2026-08-18T15:16:38Z",
-  "total_seconds": 7.771,
+  "build_time": "2026-08-18T15:49:15Z",
+  "total_seconds": 7.769,
   "pages": [
     {
       "page": "index.qmd",
-      "seconds": 2.969,
+      "seconds": 2.817,
       "frozen": false
     },
     {
       "page": "user-guide/how-it-works.qmd",
-      "seconds": 1.866,
+      "seconds": 1.99,
       "frozen": false
     },
     {
       "page": "package-info.qmd",
-      "seconds": 0.808,
-      "frozen": false
-    },
-    {
-      "page": "reference/index.qmd",
-      "seconds": 0.436,
-      "frozen": false
-    },
-    {
-      "page": "reference/smooth_state_cox.qmd",
-      "seconds": 0.433,
-      "frozen": false
-    },
-    {
-      "page": "reference/smooth_binary_state.qmd",
-      "seconds": 0.425,
-      "frozen": false
-    },
-    {
-      "page": "skills.qmd",
-      "seconds": 0.42,
+      "seconds": 0.798,
       "frozen": false
     },
     {
       "page": "user-guide/benchmarks.qmd",
-      "seconds": 0.414,
+      "seconds": 0.444,
+      "frozen": false
+    },
+    {
+      "page": "reference/smooth_state_cox.qmd",
+      "seconds": 0.44,
+      "frozen": false
+    },
+    {
+      "page": "reference/smooth_binary_state.qmd",
+      "seconds": 0.433,
+      "frozen": false
+    },
+    {
+      "page": "skills.qmd",
+      "seconds": 0.432,
+      "frozen": false
+    },
+    {
+      "page": "reference/index.qmd",
+      "seconds": 0.415,
       "frozen": false
     }
   ]
