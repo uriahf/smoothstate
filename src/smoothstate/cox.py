@@ -37,40 +37,63 @@ def _cox_score_info_efron(
     event: np.ndarray,
     penalizer: float,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Score and observed information for a Cox model with Efron ties."""
+    """Score and observed information for a Cox model with Efron ties.
+
+    Risk-set moments are accumulated once while traversing observations from
+    largest to smallest time. This avoids rebuilding each risk set from the
+    full sample and keeps each Newton iteration approximately O(n).
+    """
     eta = np.clip(x @ beta, -50.0, 50.0)
     risk = np.exp(eta)
     p = x.shape[1]
     score = -penalizer * beta
     info = np.eye(p) * penalizer
 
-    for t in np.unique(time[event == 1]):
-        deaths = (time == t) & (event == 1)
-        at_risk = time >= t
+    order = np.argsort(-time, kind="stable")
+    time_s = time[order]
+    event_s = event[order]
+    x_s = x[order]
+    risk_s = risk[order]
+
+    s0 = 0.0
+    s1 = np.zeros(p, dtype=float)
+    s2 = np.zeros((p, p), dtype=float)
+
+    start = 0
+    n = len(time_s)
+    while start < n:
+        end = start + 1
+        current_time = time_s[start]
+        while end < n and time_s[end] == current_time:
+            end += 1
+
+        x_group = x_s[start:end]
+        r_group = risk_s[start:end]
+        e_group = event_s[start:end]
+
+        s0 += float(r_group.sum())
+        s1 += (r_group[:, None] * x_group).sum(axis=0)
+        s2 += np.einsum("i,ij,ik->jk", r_group, x_group, x_group)
+
+        deaths = e_group == 1
         d = int(deaths.sum())
-        if d == 0:
-            continue
+        if d:
+            xd = x_group[deaths]
+            rd = r_group[deaths]
+            d0 = float(rd.sum())
+            d1 = (rd[:, None] * xd).sum(axis=0)
+            d2 = np.einsum("i,ij,ik->jk", rd, xd, xd)
+            score += xd.sum(axis=0)
 
-        r = risk[at_risk]
-        xr = x[at_risk]
-        s0 = r.sum()
-        s1 = (r[:, None] * xr).sum(axis=0)
-        s2 = np.einsum("i,ij,ik->jk", r, xr, xr)
+            for l in range(d):
+                frac = l / d
+                den = s0 - frac * d0
+                mean = (s1 - frac * d1) / den
+                second = (s2 - frac * d2) / den
+                score -= mean
+                info += second - np.outer(mean, mean)
 
-        rd = risk[deaths]
-        xd = x[deaths]
-        d0 = rd.sum()
-        d1 = (rd[:, None] * xd).sum(axis=0)
-        d2 = np.einsum("i,ij,ik->jk", rd, xd, xd)
-
-        score += xd.sum(axis=0)
-        for l in range(d):
-            frac = l / d
-            den = s0 - frac * d0
-            mean = (s1 - frac * d1) / den
-            second = (s2 - frac * d2) / den
-            score -= mean
-            info += second - np.outer(mean, mean)
+        start = end
 
     return score, info
 
@@ -103,14 +126,30 @@ def _breslow_baseline_cumulative_hazard(
     event: np.ndarray,
     horizon: float,
 ) -> float:
-    """Estimate Breslow baseline cumulative hazard through ``horizon``."""
+    """Estimate Breslow baseline cumulative hazard through ``horizon`` in O(n)."""
     risk = np.exp(np.clip(x @ beta, -50.0, 50.0))
+    order = np.argsort(-time, kind="stable")
+    time_s = time[order]
+    event_s = event[order]
+    risk_s = risk[order]
+
+    cumulative_risk = 0.0
     h0 = 0.0
-    for t in np.unique(time[(event == 1) & (time <= horizon)]):
-        d = int(((time == t) & (event == 1)).sum())
-        den = risk[time >= t].sum()
-        if den > 0:
-            h0 += d / den
+    start = 0
+    n = len(time_s)
+    while start < n:
+        end = start + 1
+        current_time = time_s[start]
+        while end < n and time_s[end] == current_time:
+            end += 1
+
+        cumulative_risk += float(risk_s[start:end].sum())
+        if current_time <= horizon:
+            d = int(event_s[start:end].sum())
+            if d and cumulative_risk > 0:
+                h0 += d / cumulative_risk
+        start = end
+
     return float(h0)
 
 
