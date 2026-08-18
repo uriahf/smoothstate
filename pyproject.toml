@@ -1,0 +1,23 @@
+[project]
+name = "smoothstate"
+version = "0.1.0"
+description = "Smooth state-occupation probabilities over a continuous predictor"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "polars>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "statsmodels>=0.14",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
