@@ -1,0 +1,44 @@
+name: R validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'benchmarks/export_r_validation.py'
+      - 'benchmarks/validate_r.R'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/r-validation.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'benchmarks/export_r_validation.py'
+      - 'benchmarks/validate_r.R'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/r-validation.yml'
+
+jobs:
+  r-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: uv sync --extra dev
+      - run: uv run python benchmarks/export_r_validation.py
+
+      - name: Install R and survival
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends r-base r-cran-survival
+          R --version
+
+      - name: Validate against survival
+        run: Rscript benchmarks/validate_r.R

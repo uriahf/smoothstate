@@ -35,42 +35,69 @@ def _cox_score_info_efron(
     x: np.ndarray,
     time: np.ndarray,
     event: np.ndarray,
-    penalizer: float,
+    penalty_weights: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Score and observed information for a Cox model with Efron ties."""
     eta = np.clip(x @ beta, -50.0, 50.0)
     risk = np.exp(eta)
     p = x.shape[1]
-    score = -penalizer * beta
-    info = np.eye(p) * penalizer
+    score = -penalty_weights * beta
+    info = np.diag(penalty_weights)
 
-    for t in np.unique(time[event == 1]):
-        deaths = (time == t) & (event == 1)
-        at_risk = time >= t
+    order = np.argsort(-time, kind="stable")
+    time_s = time[order]
+    event_s = event[order]
+    x_s = x[order]
+    risk_s = risk[order]
+
+    if len(np.unique(time_s)) == len(time_s):
+        s0 = np.cumsum(risk_s)
+        s1 = np.cumsum(risk_s[:, None] * x_s, axis=0)
+        xx = np.einsum("ij,ik->ijk", x_s, x_s)
+        s2 = np.cumsum(risk_s[:, None, None] * xx, axis=0)
+
+        idx = event_s == 1
+        mean = s1[idx] / s0[idx, None]
+        second = s2[idx] / s0[idx, None, None]
+        score += x_s[idx].sum(axis=0) - mean.sum(axis=0)
+        info += (second - np.einsum("ij,ik->ijk", mean, mean)).sum(axis=0)
+        return score, info
+
+    s0 = 0.0
+    s1 = np.zeros(p, dtype=float)
+    s2 = np.zeros((p, p), dtype=float)
+    start = 0
+    n = len(time_s)
+    while start < n:
+        end = start + 1
+        current_time = time_s[start]
+        while end < n and time_s[end] == current_time:
+            end += 1
+
+        x_group = x_s[start:end]
+        r_group = risk_s[start:end]
+        e_group = event_s[start:end]
+        s0 += float(r_group.sum())
+        s1 += (r_group[:, None] * x_group).sum(axis=0)
+        s2 += np.einsum("i,ij,ik->jk", r_group, x_group, x_group)
+
+        deaths = e_group == 1
         d = int(deaths.sum())
-        if d == 0:
-            continue
-
-        r = risk[at_risk]
-        xr = x[at_risk]
-        s0 = r.sum()
-        s1 = (r[:, None] * xr).sum(axis=0)
-        s2 = np.einsum("i,ij,ik->jk", r, xr, xr)
-
-        rd = risk[deaths]
-        xd = x[deaths]
-        d0 = rd.sum()
-        d1 = (rd[:, None] * xd).sum(axis=0)
-        d2 = np.einsum("i,ij,ik->jk", rd, xd, xd)
-
-        score += xd.sum(axis=0)
-        for l in range(d):
-            frac = l / d
-            den = s0 - frac * d0
-            mean = (s1 - frac * d1) / den
-            second = (s2 - frac * d2) / den
-            score -= mean
-            info += second - np.outer(mean, mean)
+        if d:
+            xd = x_group[deaths]
+            rd = r_group[deaths]
+            d0 = float(rd.sum())
+            d1 = (rd[:, None] * xd).sum(axis=0)
+            d2 = np.einsum("i,ij,ik->jk", rd, xd, xd)
+            score += xd.sum(axis=0)
+            for l in range(d):
+                frac = l / d
+                den = s0 - frac * d0
+                mean = (s1 - frac * d1) / den
+                second = (s2 - frac * d2) / den
+                score -= mean
+                info += second - np.outer(mean, mean)
+        start = end
 
     return score, info
 
@@ -84,10 +111,19 @@ def _fit_cox_efron(
     max_iter: int = 50,
     tol: float = 1e-8,
 ) -> np.ndarray:
-    """Fit a small Cox PH model with Newton-Raphson."""
+    """Fit a small Cox PH model with Newton-Raphson.
+
+    The L2 penalty matches lifelines' convention: the penalty is scaled by
+    sample size and is applied on internally standardized covariates. On the
+    original coefficient scale this is ``n * penalizer * std(X)^2``.
+    """
+    std = np.std(x, axis=0, ddof=1)
+    std = np.where(std > 0, std, 1.0)
+    penalty_weights = len(x) * penalizer * std**2
+
     beta = np.zeros(x.shape[1], dtype=float)
     for _ in range(max_iter):
-        score, info = _cox_score_info_efron(beta, x, time, event, penalizer)
+        score, info = _cox_score_info_efron(beta, x, time, event, penalty_weights)
         step = np.linalg.solve(info, score)
         beta_new = beta + step
         if np.max(np.abs(step)) < tol:
@@ -103,15 +139,44 @@ def _breslow_baseline_cumulative_hazard(
     event: np.ndarray,
     horizon: float,
 ) -> float:
-    """Estimate Breslow baseline cumulative hazard through ``horizon``."""
+    """Estimate and interpolate Breslow baseline cumulative hazard.
+
+    The cumulative hazard is evaluated at every observed time and linearly
+    interpolated at ``horizon``. This mirrors lifelines' prediction behavior
+    when a requested horizon is not itself an observed time.
+    """
     risk = np.exp(np.clip(x @ beta, -50.0, 50.0))
-    h0 = 0.0
-    for t in np.unique(time[(event == 1) & (time <= horizon)]):
-        d = int(((time == t) & (event == 1)).sum())
-        den = risk[time >= t].sum()
-        if den > 0:
-            h0 += d / den
-    return float(h0)
+    order = np.argsort(-time, kind="stable")
+    time_s = time[order]
+    event_s = event[order]
+    risk_s = risk[order]
+
+    if len(np.unique(time_s)) == len(time_s):
+        cumulative_risk = np.cumsum(risk_s)
+        increments_desc = np.where(event_s == 1, 1.0 / cumulative_risk, 0.0)
+        times_asc = time_s[::-1]
+        cumulative_hazard = np.cumsum(increments_desc[::-1])
+        return float(np.interp(horizon, times_asc, cumulative_hazard))
+
+    cumulative_risk = 0.0
+    group_times_desc: list[float] = []
+    increments_desc: list[float] = []
+    start = 0
+    n = len(time_s)
+    while start < n:
+        end = start + 1
+        current_time = time_s[start]
+        while end < n and time_s[end] == current_time:
+            end += 1
+        cumulative_risk += float(risk_s[start:end].sum())
+        d = int(event_s[start:end].sum())
+        group_times_desc.append(float(current_time))
+        increments_desc.append(d / cumulative_risk if d and cumulative_risk > 0 else 0.0)
+        start = end
+
+    times_asc = np.asarray(group_times_desc[::-1], dtype=float)
+    cumulative_hazard = np.cumsum(np.asarray(increments_desc[::-1], dtype=float))
+    return float(np.interp(horizon, times_asc, cumulative_hazard))
 
 
 def smooth_state_cox(
@@ -123,13 +188,7 @@ def smooth_state_cox(
     grid: np.ndarray | None = None,
     penalizer: float = 0.01,
 ) -> pl.DataFrame:
-    """Smooth event-state probability using secondary Cox + 3-knot RCS.
-
-    This mirrors the secondary Cox smoother used by ``rtichoke``: predicted
-    probabilities are complementary-log-log transformed, expanded with a
-    3-knot restricted cubic spline, and used as the sole predictors in a Cox
-    proportional hazards model.
-    """
+    """Smooth event-state probability using secondary Cox + 3-knot RCS."""
     p = np.asarray(probs, dtype=float)
     t = np.asarray(times, dtype=float)
     e = np.asarray(events, dtype=int)

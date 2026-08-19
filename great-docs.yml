@@ -1,0 +1,57 @@
+display_name: "Smooth State"
+package: smoothstate
+parser: numpy
+user_guide: user_guide
+homepage: index
+site_url: https://uriahf.github.io/smoothstate/
+
+github_style: widget
+dark_mode_toggle: true
+back_to_top: true
+keyboard_nav: true
+markdown_pages: true
+
+navbar_style: sky
+content_style:
+  preset: mint
+  pages: all
+accent_color:
+  light: "#1f5f82"
+  dark: "#73c7e8"
+
+logo_show_title: true
+hero:
+  name: "Smooth State"
+  tagline: "Fast smoothing of state probabilities, built for Polars."
+  badges:
+    - alt: Requires Python 3.10 or newer
+      img: https://img.shields.io/badge/python-%E2%89%A53.10-3776AB?logo=python&logoColor=white
+      url: https://github.com/uriahf/smoothstate
+
+nav_icons:
+  navbar:
+    User Guide: book-open
+    API Reference: code-2
+  sidebar:
+    User Guide: book-open
+
+source:
+  enabled: true
+  branch: main
+  path: src/smoothstate
+  placement: usage
+
+changelog:
+  enabled: false
+
+reference:
+  title: "API Reference"
+  desc: >-
+    Polars-first smoothing primitives for binary and time-dependent state probabilities.
+  sections:
+    - title: "Binary state smoothing"
+      contents:
+        - smooth_binary_state
+    - title: "Time-dependent state smoothing"
+      contents:
+        - smooth_state_cox
