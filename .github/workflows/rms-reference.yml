@@ -1,0 +1,26 @@
+name: rms reference validation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rms-reference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: uv sync --extra dev
+      - run: uv run python benchmarks/export_r_validation.py
+
+      - name: Install R and rms reference stack
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends r-base r-cran-rms
+          R --version
+
+      - name: Validate against rms
+        run: Rscript benchmarks/validate_rms.R
