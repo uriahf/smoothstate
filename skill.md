@@ -2,7 +2,7 @@
 name: smoothstate
 description: >
   Fast smoothing of state probabilities for Polars workflows. Use when writing Python code that uses the smoothstate package.
-compatibility: Requires Python >=3.9.
+compatibility: Requires Python >=3.10.
 ---
 
 # Smooth State

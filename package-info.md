@@ -24,7 +24,7 @@
 
 # Summary
 
-- **Requires:** Python `>=3.9`
+- **Requires:** Python `>=3.10`
 - **Runtime Dependencies:** 2
 - **Optional Dependencies:** 1 groups (4 unique packages)
 - **Total unique dependencies:** 6
