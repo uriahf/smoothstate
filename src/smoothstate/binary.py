@@ -15,7 +15,13 @@ def _tricube(u: np.ndarray) -> np.ndarray:
 
 
 def _local_linear_at_data(x: np.ndarray, y: np.ndarray, *, frac: float) -> np.ndarray:
-    """Fit one non-robust Cleveland LOWESS pass at the observed x values."""
+    """Fit one non-robust Cleveland LOWESS pass at the observed x values.
+
+    The observations are sorted once and the nearest-neighbour window is then
+    maintained with two monotone pointers.  This avoids allocating an n-vector
+    of distances and running ``np.partition`` for every fitted point while
+    preserving the same tricube/local-linear calculation.
+    """
     order = np.argsort(x, kind="mergesort")
     xs = x[order]
     ys = y[order]
@@ -23,24 +29,38 @@ def _local_linear_at_data(x: np.ndarray, y: np.ndarray, *, frac: float) -> np.nd
     n_neighbors = max(2, min(n, int(frac * n)))
     fitted = np.empty(n, dtype=float)
 
+    left = 0
+    right = n_neighbors
+    eps = np.finfo(float).eps
+
     for i, x0 in enumerate(xs):
-        distances = np.abs(xs - x0)
-        bandwidth = np.partition(distances, n_neighbors - 1)[n_neighbors - 1]
+        # Move the fixed-size window right whenever doing so makes the new
+        # right endpoint closer than the old left endpoint.  Equality stays
+        # on the left, matching the bandwidth implied by kth-distance LOWESS.
+        while right < n and x0 - xs[left] > xs[right] - x0:
+            left += 1
+            right += 1
+
+        xw = xs[left:right]
+        yw = ys[left:right]
+        bandwidth = max(x0 - xw[0], xw[-1] - x0)
+
         if bandwidth <= 0:
-            local = distances == 0
-            fitted[i] = ys[local].mean()
+            lo = np.searchsorted(xs, x0, side="left")
+            hi = np.searchsorted(xs, x0, side="right")
+            fitted[i] = ys[lo:hi].mean()
             continue
 
-        weights = _tricube(distances / bandwidth)
-        centered = xs - x0
+        centered = xw - x0
+        weights = _tricube(np.abs(centered) / bandwidth)
         s0 = weights.sum()
         s1 = np.sum(weights * centered)
         s2 = np.sum(weights * centered * centered)
-        t0 = np.sum(weights * ys)
-        t1 = np.sum(weights * centered * ys)
+        t0 = np.sum(weights * yw)
+        t1 = np.sum(weights * centered * yw)
         det = s0 * s2 - s1 * s1
 
-        if det <= np.finfo(float).eps:
+        if det <= eps:
             fitted[i] = t0 / s0 if s0 > 0 else ys.mean()
         else:
             fitted[i] = (t0 * s2 - t1 * s1) / det
