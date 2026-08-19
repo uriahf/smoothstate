@@ -1,0 +1,40 @@
+# How it works
+
+`smoothstate` estimates smooth state probabilities over a continuous predictor. In `rtichoke`, that predictor is usually a predicted probability.
+
+
+# Binary outcomes
+
+For a binary state indicator Y, the target is
+
+ P(Y = 1 \mid p), 
+
+where p is the model prediction. [smooth_binary_state()](../reference/smooth_binary_state.md#smoothstate.smooth_binary_state) estimates this relationship with a local linear smoother and returns the curve as a Polars DataFrame.
+
+
+# Time-to-event outcomes
+
+For survival calibration at horizon t, the target is
+
+ P\\Z(t)=1 \mid \hat p(t)=p\\. 
+
+The secondary-Cox smoother follows the calibration approach used in `rtichoke`:
+
+ x_i = \log\\-\log(1-\hat p_i)\\, 
+
+then expands x_i with a 3-knot restricted cubic spline using knots at the 10th, 50th, and 90th percentiles. The resulting two-column spline basis is the sole predictor in a Cox proportional hazards model.
+
+The fitted model has the form
+
+ h(u \mid x_i) = h_0(u)\exp\\\mathbf{s}(x_i)^T\boldsymbol\beta\\, 
+
+and the smooth state probability at horizon t is
+
+ \widehat P\\Z(t)=1\mid p\\ = 1 - \exp\left\[-\widehat H_0(t)\exp\\\mathbf{s}(x)^T\widehat{\boldsymbol\beta}\\\right\]. 
+
+The restricted cubic spline allows the relationship between predicted and observed risk to be nonlinear while remaining linear in the tails.
+
+
+# Why a specialized implementation?
+
+The Cox design matrix here has only one transformed predictor and one spline term. `smoothstate` exploits this narrow structure directly instead of constructing a general-purpose regression model. Runtime dependencies remain NumPy and Polars.

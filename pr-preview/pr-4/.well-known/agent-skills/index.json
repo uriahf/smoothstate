@@ -1,0 +1,11 @@
+{
+  "skills": [
+    {
+      "name": "smoothstate",
+      "description": "Fast smoothing of state probabilities for Polars workflows. Use when writing Python code that uses the smoothstate package.",
+      "files": [
+        "SKILL.md"
+      ]
+    }
+  ]
+}

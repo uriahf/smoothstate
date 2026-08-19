@@ -1,0 +1,102 @@
+----------------------------------------------------------------------
+This is the API documentation for the smoothstate library.
+----------------------------------------------------------------------
+
+
+## Binary state smoothing
+
+
+smooth_binary_state(probs: 'np.ndarray | pl.Series', states: 'np.ndarray | pl.Series', *, grid: 'np.ndarray | None' = None, frac: 'float' = 0.6666666666666666) -> 'pl.DataFrame'
+
+Smooth ``P(state=1 | prob)`` with local linear regression.
+
+
+## Time-dependent state smoothing
+
+
+smooth_state_cox(probs: 'np.ndarray | pl.Series', times: 'np.ndarray | pl.Series', events: 'np.ndarray | pl.Series', horizon: 'float', *, grid: 'np.ndarray | None' = None, penalizer: 'float' = 0.01) -> 'pl.DataFrame'
+
+Smooth event-state probability using secondary Cox + 3-knot RCS.
+
+
+----------------------------------------------------------------------
+This is the User Guide documentation for the package.
+----------------------------------------------------------------------
+
+# How it works
+
+`smoothstate` estimates smooth state probabilities over a continuous predictor. In `rtichoke`, that predictor is usually a predicted probability.
+
+## Binary outcomes
+
+For a binary state indicator $Y$, the target is
+
+$$
+P(Y = 1 \mid p),
+$$
+
+where $p$ is the model prediction. `smooth_binary_state()` estimates this relationship with a local linear smoother and returns the curve as a Polars DataFrame.
+
+## Time-to-event outcomes
+
+For survival calibration at horizon $t$, the target is
+
+$$
+P\{Z(t)=1 \mid \hat p(t)=p\}.
+$$
+
+The secondary-Cox smoother follows the calibration approach used in `rtichoke`:
+
+$$
+x_i = \log\{-\log(1-\hat p_i)\},
+$$
+
+then expands $x_i$ with a 3-knot restricted cubic spline using knots at the 10th, 50th, and 90th percentiles. The resulting two-column spline basis is the sole predictor in a Cox proportional hazards model.
+
+The fitted model has the form
+
+$$
+h(u \mid x_i) = h_0(u)\exp\{\mathbf{s}(x_i)^T\boldsymbol\beta\},
+$$
+
+and the smooth state probability at horizon $t$ is
+
+$$
+\widehat P\{Z(t)=1\mid p\}
+= 1 - \exp\left[-\widehat H_0(t)\exp\{\mathbf{s}(x)^T\widehat{\boldsymbol\beta}\}\right].
+$$
+
+The restricted cubic spline allows the relationship between predicted and observed risk to be nonlinear while remaining linear in the tails.
+
+## Why a specialized implementation?
+
+The Cox design matrix here has only one transformed predictor and one spline term. `smoothstate` exploits this narrow structure directly instead of constructing a general-purpose regression model. Runtime dependencies remain NumPy and Polars.
+
+
+# Performance
+
+`smoothstate` is intentionally specialized for smoothing state probabilities. The secondary-Cox implementation uses the same cloglog transformation, 3-knot restricted cubic spline, Efron tie handling, and ridge-penalized Cox model used by the current `rtichoke` implementation, while avoiding the general modeling overhead of `lifelines`.
+
+On GitHub Actions with Python 3.12 and `lifelines` 0.30.3:
+
+| Observations | `smoothstate` | `lifelines` | Speedup |
+|---:|---:|---:|---:|
+| 1,000 | 0.0021 s | 0.0820 s | 39.0× |
+| 10,000 | 0.0212 s | 0.6103 s | 28.9× |
+| 100,000 | 0.2353 s | 6.0746 s | 25.8× |
+
+After matching `lifelines` penalty scaling, standardization, and baseline cumulative-hazard interpolation, predicted curves agree to numerical noise (maximum absolute differences around 1e-8 in the benchmark).
+
+## Reference validation
+
+The Cox core is also checked independently against R's `survival::coxph()` on the same deterministic validation data. The current GitHub Actions reference run gives:
+
+| Comparison | Maximum absolute difference |
+|---|---:|
+| Cox coefficients | 2.28e-08 |
+| Predicted risk curve | 3.66e-09 |
+
+This cross-language agreement provides an independent check of the unpenalized Cox implementation. Harrell's `rms::cph(Surv(...) ~ rcs(x, 3))` comparison is retained as a manual reference validation because installing the full `rms` dependency stack is unnecessarily expensive for routine CI.
+
+These benchmarks are development checks rather than general claims about all Cox regression workloads. `smoothstate` is faster here because it solves a deliberately narrow problem with a one-predictor, two-column spline design matrix.
+
