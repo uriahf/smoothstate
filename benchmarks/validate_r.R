@@ -28,7 +28,8 @@ risk_survival <- 1 - exp(-h0_survival * exp(lp_survival))
 survival_curve_diff <- max(abs(as.numeric(risk_survival) - grid$smoothstate_risk))
 
 # 2) Harrell rms validation using the natural rcs(x, 3) specification.
-dd <- datadist(input$x)
+# datadist() needs the named data frame so rms can resolve it later.
+dd <- datadist(input)
 options(datadist = "dd")
 fit_rms <- cph(
   Surv(time, event) ~ rcs(x, 3),
