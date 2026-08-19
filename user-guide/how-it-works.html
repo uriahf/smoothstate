@@ -74,6 +74,49 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const list = document.querySelector("#navbarCollapse .navbar-nav");
+  const brand = document.querySelector(".navbar-brand");
+  if (!list || !brand) return;
+
+  const root = new URL(brand.href);
+  const pages = [
+    ["Home", new URL(".", root).href],
+    ["How It Works", new URL("user-guide/how-it-works.html", root).href],
+    ["Performance", new URL("user-guide/benchmarks.html", root).href],
+  ];
+
+  const apiItem = [...list.querySelectorAll(":scope > .nav-item")].find((item) =>
+    item.textContent.trim().includes("API Reference")
+  );
+  const userGuideItem = [...list.querySelectorAll(":scope > .nav-item")].find((item) =>
+    item.textContent.trim().includes("User Guide")
+  );
+
+  for (const [label, href] of pages) {
+    const item = document.createElement("li");
+    item.className = "nav-item";
+
+    const link = document.createElement("a");
+    link.className = "nav-link";
+    link.href = href;
+    link.textContent = label;
+
+    const currentPath = window.location.pathname.replace(/index\.html$/, "");
+    const linkPath = new URL(href).pathname.replace(/index\.html$/, "");
+    if (currentPath === linkPath) {
+      link.classList.add("active");
+      link.setAttribute("aria-current", "page");
+    }
+
+    item.appendChild(link);
+    list.insertBefore(item, apiItem || null);
+  }
+
+  userGuideItem?.remove();
+});
+</script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script>document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:(document.querySelector('meta[name="quarto:offset"]')||{content:''}).content+'termshow.css'}));</script>
 <script>document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:(document.querySelector('meta[name="quarto:offset"]')||{content:''}).content+'gd-lightbox.css'}));</script>
@@ -131,10 +174,12 @@ window.Quarto = {
 </script>
 
   <link rel="alternate" type="text/markdown" href="how-it-works.md">
+  <link rel="canonical" href="https://uriahf.github.io/smoothstate/user-guide/how-it-works.html">
   <meta name="description" content="For a binary state indicator Y, the target is">
   <meta property="og:type" content="website">
   <meta property="og:title" content="how-it-works – Smooth State | Smooth State">
   <meta property="og:description" content="For a binary state indicator Y, the target is">
+  <meta property="og:url" content="https://uriahf.github.io/smoothstate/user-guide/how-it-works.html">
   <meta property="og:site_name" content="Smooth State">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="how-it-works – Smooth State | Smooth State">
@@ -165,6 +210,13 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="../reference/index.html"> 
 <span class="menu-text">API Reference</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <span class="nav-link">
+<div id="github-widget" data-owner="uriahf" data-repo="smoothstate" data-stars="0" data-forks="0"></div>
+    </span>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -633,6 +685,7 @@ h(u \mid x_i) = h_0(u)\exp\{\mathbf{s}(x_i)^T\boldsymbol\beta\},
 </div>
 </div>
 </footer>
+<script src="../github-widget.js"></script>
 <script src="../copy-page.js"></script>
 <script src="../sidebar-wrap.js"></script>
 <script>(function(){var s=document.createElement('script');var m=document.querySelector('meta[name="quarto:offset"]');s.src=(m?m.content:'')+'sidebar-float.js';document.body.appendChild(s);})();</script>

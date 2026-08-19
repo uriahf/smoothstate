@@ -1,6 +1,6 @@
 # smoothstate
 
-> Smooth state-occupation probabilities over a continuous predictor
+> Fast smoothing of state probabilities for Polars workflows
 
 ## Docs
 

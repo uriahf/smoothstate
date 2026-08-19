@@ -6,7 +6,6 @@ Smooth `P(state=1 | prob)` with local linear regression.
 
 Usage
 
-
 ``` python
 smooth_binary_state(
     probs,

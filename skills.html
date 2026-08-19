@@ -108,6 +108,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const list = document.querySelector("#navbarCollapse .navbar-nav");
+  const brand = document.querySelector(".navbar-brand");
+  if (!list || !brand) return;
+
+  const root = new URL(brand.href);
+  const pages = [
+    ["Home", new URL(".", root).href],
+    ["How It Works", new URL("user-guide/how-it-works.html", root).href],
+    ["Performance", new URL("user-guide/benchmarks.html", root).href],
+  ];
+
+  const apiItem = [...list.querySelectorAll(":scope > .nav-item")].find((item) =>
+    item.textContent.trim().includes("API Reference")
+  );
+  const userGuideItem = [...list.querySelectorAll(":scope > .nav-item")].find((item) =>
+    item.textContent.trim().includes("User Guide")
+  );
+
+  for (const [label, href] of pages) {
+    const item = document.createElement("li");
+    item.className = "nav-item";
+
+    const link = document.createElement("a");
+    link.className = "nav-link";
+    link.href = href;
+    link.textContent = label;
+
+    const currentPath = window.location.pathname.replace(/index\.html$/, "");
+    const linkPath = new URL(href).pathname.replace(/index\.html$/, "");
+    if (currentPath === linkPath) {
+      link.classList.add("active");
+      link.setAttribute("aria-current", "page");
+    }
+
+    item.appendChild(link);
+    list.insertBefore(item, apiItem || null);
+  }
+
+  userGuideItem?.remove();
+});
+</script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script>document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:(document.querySelector('meta[name="quarto:offset"]')||{content:''}).content+'termshow.css'}));</script>
 <script>document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:(document.querySelector('meta[name="quarto:offset"]')||{content:''}).content+'gd-lightbox.css'}));</script>
@@ -121,11 +164,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="gd-content-style" data-preset="mint" data-pages="all">
 
 
+  <link rel="canonical" href="https://uriahf.github.io/smoothstate/skills.html">
   <meta name="description" content="A skill is a package of structured files that teaches an AI coding agent how to work with a specific tool or framework. The skill below was generated...">
   <meta name="robots" content="noindex, nofollow">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Skills – Smooth State | Smooth State">
   <meta property="og:description" content="A skill is a package of structured files that teaches an AI coding agent how to work with a specific tool or framework. The skill below was generated...">
+  <meta property="og:url" content="https://uriahf.github.io/smoothstate/skills.html">
   <meta property="og:site_name" content="Smooth State">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Skills – Smooth State | Smooth State">
@@ -156,6 +201,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li class="nav-item">
     <a class="nav-link" href="./reference/index.html"> 
 <span class="menu-text">API Reference</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <span class="nav-link">
+<div id="github-widget" data-owner="uriahf" data-repo="smoothstate" data-stars="0" data-forks="0"></div>
+    </span>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -225,13 +277,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre class="gd-skills-raw"><div class="sourceCode" id="cb1"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">name:</span><span class="co"> smoothstate</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> &gt;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">  Smooth state-occupation probabilities over a continuous predictor. Use when writing Python code that uses the smoothstate package.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">  Fast smoothing of state probabilities for Polars workflows. Use when writing Python code that uses the smoothstate package.</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">compatibility:</span><span class="co"> Requires Python &gt;=3.10.</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu"># Smooth State</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>Smooth state-occupation probabilities over a continuous predictor</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>Fast smoothing of state probabilities for Polars workflows</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## Installation</span></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
@@ -253,7 +305,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Full documentation</span><span class="co">](https://uriahf.github.io/smoothstate/)</span></span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">llms.txt</span><span class="co">](llms.txt)</span> — Indexed API reference for LLMs</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">llms-full.txt</span><span class="co">](llms-full.txt)</span> — Comprehensive documentation for LLMs</span></code></pre></div>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">llms-full.txt</span><span class="co">](llms-full.txt)</span> — Comprehensive documentation for LLMs</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Source code</span><span class="co">](https://github.com/uriahf/smoothstate)</span></span></code></pre></div>
 </pre>
 
 
@@ -605,6 +658,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </footer>
+<script src="github-widget.js"></script>
 <script src="copy-page.js"></script>
 <script src="sidebar-wrap.js"></script>
 <script>(function(){var s=document.createElement('script');var m=document.querySelector('meta[name="quarto:offset"]');s.src=(m?m.content:'')+'sidebar-float.js';document.body.appendChild(s);})();</script>

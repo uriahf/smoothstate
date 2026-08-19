@@ -2,7 +2,7 @@
   "skills": [
     {
       "name": "smoothstate",
-      "description": "Smooth state-occupation probabilities over a continuous predictor. Use when writing Python code that uses the smoothstate package.",
+      "description": "Fast smoothing of state probabilities for Polars workflows. Use when writing Python code that uses the smoothstate package.",
       "files": [
         "SKILL.md"
       ]

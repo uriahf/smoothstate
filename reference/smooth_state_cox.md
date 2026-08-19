@@ -6,7 +6,6 @@ Smooth event-state probability using secondary Cox + 3-knot RCS.
 
 Usage
 
-
 ``` python
 smooth_state_cox(
     probs,

@@ -1,35 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://uriahf.github.io/smoothstate/user-guide/how-it-works.html</loc>
-    <lastmod>2026-08-19T05:45:51.129Z</lastmod>
-  </url>
-  <url>
-    <loc>https://uriahf.github.io/smoothstate/skills.html</loc>
-    <lastmod>2026-08-19T05:45:51.125Z</lastmod>
-  </url>
-  <url>
-    <loc>https://uriahf.github.io/smoothstate/reference/smooth_binary_state.html</loc>
-    <lastmod>2026-08-19T05:45:51.178Z</lastmod>
-  </url>
-  <url>
-    <loc>https://uriahf.github.io/smoothstate/package-info.html</loc>
-    <lastmod>2026-08-19T05:45:50.914Z</lastmod>
-  </url>
-  <url>
-    <loc>https://uriahf.github.io/smoothstate/index.html</loc>
-    <lastmod>2026-08-19T05:45:50.917Z</lastmod>
-  </url>
-  <url>
-    <loc>https://uriahf.github.io/smoothstate/reference/index.html</loc>
-    <lastmod>2026-08-19T05:45:51.177Z</lastmod>
-  </url>
-  <url>
-    <loc>https://uriahf.github.io/smoothstate/reference/smooth_state_cox.html</loc>
-    <lastmod>2026-08-19T05:45:51.178Z</lastmod>
+    <loc>https://uriahf.github.io/smoothstate/</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
   </url>
   <url>
     <loc>https://uriahf.github.io/smoothstate/user-guide/benchmarks.html</loc>
-    <lastmod>2026-08-19T05:45:51.129Z</lastmod>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://uriahf.github.io/smoothstate/user-guide/how-it-works.html</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://uriahf.github.io/smoothstate/reference/</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://uriahf.github.io/smoothstate/reference/smooth_binary_state.html</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://uriahf.github.io/smoothstate/reference/smooth_state_cox.html</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://uriahf.github.io/smoothstate/assets/site-navigation.html</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://uriahf.github.io/smoothstate/package-info.html</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://uriahf.github.io/smoothstate/skills.html</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>

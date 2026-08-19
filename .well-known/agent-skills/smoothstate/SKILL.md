@@ -1,13 +1,13 @@
 ---
 name: smoothstate
 description: >
-  Smooth state-occupation probabilities over a continuous predictor. Use when writing Python code that uses the smoothstate package.
+  Fast smoothing of state probabilities for Polars workflows. Use when writing Python code that uses the smoothstate package.
 compatibility: Requires Python >=3.10.
 ---
 
 # Smooth State
 
-Smooth state-occupation probabilities over a continuous predictor
+Fast smoothing of state probabilities for Polars workflows
 
 ## Installation
 
@@ -30,3 +30,4 @@ pip install smoothstate
 - [Full documentation](https://uriahf.github.io/smoothstate/)
 - [llms.txt](llms.txt) — Indexed API reference for LLMs
 - [llms-full.txt](llms-full.txt) — Comprehensive documentation for LLMs
+- [Source code](https://github.com/uriahf/smoothstate)
