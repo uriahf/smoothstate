@@ -11,6 +11,9 @@ back_to_top: true
 keyboard_nav: true
 markdown_pages: true
 
+include_in_header:
+  - file: assets/site-navigation.html
+
 navbar_style: sky
 content_style:
   preset: mint
@@ -23,6 +26,7 @@ logo_show_title: true
 hero:
   name: "Smooth State"
   tagline: "Fast smoothing of state probabilities, built for Polars."
+  logo_height: 180px
   badges:
     - alt: Requires Python 3.10 or newer
       img: https://img.shields.io/badge/python-%E2%89%A53.10-3776AB?logo=python&logoColor=white
