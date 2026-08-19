@@ -3,13 +3,12 @@ name = "smoothstate"
 version = "0.1.0"
 description = "Fast smoothing of state probabilities for Polars workflows"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = ["calibration", "cox", "polars", "restricted-cubic-spline", "survival-analysis"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
