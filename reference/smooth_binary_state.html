@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   <link rel="alternate" type="text/markdown" href="smooth_binary_state.md">
   <link rel="canonical" href="https://uriahf.github.io/smoothstate/reference/smooth_binary_state.html">
-  <meta name="description" content="Smooth P(state=1 | prob) with local linear regression.">
+  <meta name="description" content="Smooth P(state=1 | prob) using rtichoke-compatible LOWESS.">
   <script type="application/ld+json">
 [
   {
@@ -196,12 +196,12 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="smooth_binary_state() – Smooth State | Smooth State">
-  <meta property="og:description" content="Smooth P(state=1 | prob) with local linear regression.">
+  <meta property="og:description" content="Smooth P(state=1 | prob) using rtichoke-compatible LOWESS.">
   <meta property="og:url" content="https://uriahf.github.io/smoothstate/reference/smooth_binary_state.html">
   <meta property="og:site_name" content="Smooth State">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="smooth_binary_state() – Smooth State | Smooth State">
-  <meta name="twitter:description" content="Smooth P(state=1 | prob) with local linear regression.">
+  <meta name="twitter:description" content="Smooth P(state=1 | prob) using rtichoke-compatible LOWESS.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../index.html">
-    <span class="navbar-title">Smooth State</span>
+    <span class="navbar-title">Smooth State <span class="version-badge" title="Released 2026-08-19">v0.1.0</span></span>
     </a>
   </div>
             <div id="quarto-search" class=""></div>
@@ -324,11 +324,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <div class="doc-subject">
-<p>Smooth <code>P(state=1 | prob)</code> with local linear regression.</p>
+<p>Smooth <code>P(state=1 | prob)</code> using rtichoke-compatible LOWESS.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/uriahf/smoothstate/blob/main/src/smoothstate/binary.py#L18-L78" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/uriahf/smoothstate/blob/main/src/smoothstate/binary.py#L94-L105" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">smooth_binary_state</span>(

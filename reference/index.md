@@ -8,7 +8,7 @@ Polars-first smoothing primitives for binary and time-dependent state probabilit
 
 
 [smooth_binary_state()](smooth_binary_state.md#smoothstate.smooth_binary_state)  
-Smooth `P(state=1 | prob)` with local linear regression.
+Smooth `P(state=1 | prob)` using rtichoke-compatible LOWESS.
 
 
 ## Time-dependent state smoothing

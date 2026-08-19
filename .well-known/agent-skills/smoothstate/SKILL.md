@@ -19,7 +19,7 @@ pip install smoothstate
 
 ### Binary state smoothing
 
-- `smooth_binary_state`: Smooth ``P(state=1 | prob)`` with local linear regression
+- `smooth_binary_state`: Smooth ``P(state=1 | prob)`` using rtichoke-compatible LOWESS
 
 ### Time-dependent state smoothing
 

@@ -8,7 +8,7 @@ This is the API documentation for the smoothstate library.
 
 smooth_binary_state(probs: 'np.ndarray | pl.Series', states: 'np.ndarray | pl.Series', *, grid: 'np.ndarray | None' = None, frac: 'float' = 0.6666666666666666) -> 'pl.DataFrame'
 
-Smooth ``P(state=1 | prob)`` with local linear regression.
+Smooth ``P(state=1 | prob)`` using rtichoke-compatible LOWESS.
 
 
 ## Time-dependent state smoothing
