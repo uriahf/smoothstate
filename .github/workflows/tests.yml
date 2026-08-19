@@ -7,17 +7,25 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.12']
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
       - run: uv sync --extra dev
       - run: uv run pytest -q
-      - run: uv run python benchmarks/diagnose_cox.py
-      - run: uv run python benchmarks/benchmark_cox.py | tee benchmark-results.csv
+      - name: Run Cox diagnostics
+        if: matrix.python-version == '3.12'
+        run: uv run python benchmarks/diagnose_cox.py
+      - name: Run benchmark
+        if: matrix.python-version == '3.12'
+        run: uv run python benchmarks/benchmark_cox.py | tee benchmark-results.csv
       - uses: actions/upload-artifact@v4
+        if: matrix.python-version == '3.12'
         with:
           name: benchmark-results
           path: benchmark-results.csv
