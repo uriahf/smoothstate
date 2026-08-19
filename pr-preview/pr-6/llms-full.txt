@@ -6,12 +6,9 @@ This is the API documentation for the smoothstate library.
 ## Binary state smoothing
 
 
-smooth_binary_state(probs: 'np.ndarray | pl.Series', states: 'np.ndarray | pl.Series', *, grid: 'np.ndarray | None' = None, frac: 'float' = 0.6666666666666666, it: 'int' = 3) -> 'pl.DataFrame'
+smooth_binary_state(probs: 'np.ndarray | pl.Series', states: 'np.ndarray | pl.Series', *, grid: 'np.ndarray | None' = None, frac: 'float' = 0.6666666666666666) -> 'pl.DataFrame'
 
-Smooth ``P(state=1 | prob)`` using Cleveland LOWESS.
-
-``it`` controls residual-based robust reweighting and defaults to 3,
-matching ``statsmodels.nonparametric.lowess``.
+Smooth ``P(state=1 | prob)`` using rtichoke-compatible LOWESS.
 
 
 ## Time-dependent state smoothing

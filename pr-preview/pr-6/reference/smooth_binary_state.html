@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   <link rel="alternate" type="text/markdown" href="smooth_binary_state.md">
   <link rel="canonical" href="https://uriahf.github.io/smoothstate/reference/smooth_binary_state.html">
-  <meta name="description" content="Smooth P(state=1 | prob) using Cleveland LOWESS.">
+  <meta name="description" content="Smooth P(state=1 | prob) using rtichoke-compatible LOWESS.">
   <script type="application/ld+json">
 [
   {
@@ -196,12 +196,12 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
   <meta property="og:type" content="website">
   <meta property="og:title" content="smooth_binary_state() – Smooth State | Smooth State">
-  <meta property="og:description" content="Smooth P(state=1 | prob) using Cleveland LOWESS.">
+  <meta property="og:description" content="Smooth P(state=1 | prob) using rtichoke-compatible LOWESS.">
   <meta property="og:url" content="https://uriahf.github.io/smoothstate/reference/smooth_binary_state.html">
   <meta property="og:site_name" content="Smooth State">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="smooth_binary_state() – Smooth State | Smooth State">
-  <meta name="twitter:description" content="Smooth P(state=1 | prob) using Cleveland LOWESS.">
+  <meta name="twitter:description" content="Smooth P(state=1 | prob) using rtichoke-compatible LOWESS.">
 </head>
 
 <body class="gd-ref-sidebar nav-sidebar floating nav-fixed doc-api-page quarto-light">
@@ -324,11 +324,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <div class="doc-subject">
-<p>Smooth <code>P(state=1 | prob)</code> using Cleveland LOWESS.</p>
+<p>Smooth <code>P(state=1 | prob)</code> using rtichoke-compatible LOWESS.</p>
 </div>
 <div class="doc-usage-source">
 <p>Usage</p>
-<p><a href="https://github.com/uriahf/smoothstate/blob/main/src/smoothstate/binary.py#L71-L122" target="_blank" rel="noopener">Source</a></p>
+<p><a href="https://github.com/uriahf/smoothstate/blob/main/src/smoothstate/binary.py#L94-L105" target="_blank" rel="noopener">Source</a></p>
 </div>
 <div class="doc-signature doc-Kind.FUNCTION">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sig-name">smooth_binary_state</span>(
@@ -337,11 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
     <span class="op">*</span>,
     <span class="va">grid</span><span class="op">=</span><span class="cn-none">None</span>,
     <span class="va">frac</span><span class="op">=</span><span class="dv">2</span> <span class="op">/</span> <span class="dv">3</span>,
-    <span class="va">it</span><span class="op">=</span><span class="dv">3</span>,
 )</span></code></pre></div>
-</div>
-<div class="doc-text">
-<p><code>it</code> controls residual-based robust reweighting and defaults to 3, matching <code>statsmodels.nonparametric.lowess</code>.</p>
 </div>
 
 

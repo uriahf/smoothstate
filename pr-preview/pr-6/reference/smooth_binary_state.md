@@ -1,7 +1,7 @@
 ## smooth_binary_state()
 
 
-Smooth `P(state=1 | prob)` using Cleveland LOWESS.
+Smooth `P(state=1 | prob)` using rtichoke-compatible LOWESS.
 
 
 Usage
@@ -13,9 +13,5 @@ smooth_binary_state(
     *,
     grid=None,
     frac=2 / 3,
-    it=3,
 )
 ```
-
-
-`it` controls residual-based robust reweighting and defaults to 3, matching `statsmodels.nonparametric.lowess`.
