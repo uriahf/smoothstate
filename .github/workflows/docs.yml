@@ -67,10 +67,19 @@ jobs:
           force: false
 
       - name: Deploy pull request preview
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
         uses: rossjrw/pr-preview-action@v1
         with:
           source-dir: great-docs/_site
           preview-branch: gh-pages
-          wait-for-pages-deployment: true
+          wait-for-pages-deployment: false
+          qr-code: false
+
+      - name: Remove pull request preview
+        if: github.event_name == 'pull_request' && github.event.action == 'closed'
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          preview-branch: gh-pages
+          action: remove
+          wait-for-pages-deployment: false
           qr-code: false
