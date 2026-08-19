@@ -24,7 +24,7 @@ on:
 jobs:
   r-validation:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -34,13 +34,11 @@ jobs:
       - run: uv sync --extra dev
       - run: uv run python benchmarks/export_r_validation.py
 
-      # This is only a cross-language reference check, not an R package build.
-      # Install Ubuntu's R directly to avoid setup-r version-resolution/network hangs.
-      - name: Install R and reference packages
+      - name: Install R and survival
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends r-base r-cran-survival r-cran-rms
+          sudo apt-get install -y --no-install-recommends r-base r-cran-survival
           R --version
 
-      - name: Validate against survival and rms
+      - name: Validate against survival
         run: Rscript benchmarks/validate_r.R
